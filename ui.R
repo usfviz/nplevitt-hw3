@@ -40,9 +40,9 @@ shinyUI(navbarPage("Facebook Data Visualizations",
                             )
                    ),
                    tabPanel("Scatterplot Matrix",
-                            pairsD3Output("scatter", width = 800, height = 800),
                             h5('Click and drag to select points to highlight'),
-                            h5('Hover over a point to see if it was paid or free - this will appear in the upper lefthand corner')
+                            h5('Hover over a point to see if it was paid or free - this will appear in the upper lefthand corner'),
+                            pairsD3Output("scatter", width = 800, height = 800)
                             ),
                    tabPanel("Parallel Coordinates",
                             sidebarLayout(
