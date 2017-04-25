@@ -15,7 +15,7 @@ library(pairsD3)
 numvars <- c("Page_Total_Likes","Total_Reach","Total_Impressions","Engaged_Users","Total_Consumers",   
              "Total_Consumptions", "Comments", "Likes", "Shares", "Total_Interactions")
 
-shinyUI(navbarPage("Facebook Data",
+shinyUI(navbarPage("Facebook Data Visualizations",
                    tabPanel("Bubble Plot",
                             sidebarLayout(
                               sidebarPanel(
