@@ -1,4 +1,4 @@
-packageList = c('ggplot2', 'shiny', 'plyr', 'reshape', 'resahpe2', 'ggvis')
+packageList = c('ggplot2', 'shiny', 'plyr', 'reshape', 'ggvis', 'pairsD3')
 for (i in 1:length(packageList)) {
   if(! is.element(packageList[i],installed.packages()[,1])) {
     install.packages(packageList[i])
@@ -9,8 +9,8 @@ library(ggplot2)
 library(shiny)
 library(plyr)
 library(reshape)
-library(reshape2)
 library(ggvis)
+library(pairsD3)
 
 numvars <- c("Page_Total_Likes","Total_Reach","Total_Impressions","Engaged_Users","Total_Consumers",   
              "Total_Consumptions", "Comments", "Likes", "Shares", "Total_Interactions")
@@ -36,17 +36,20 @@ shinyUI(navbarPage("Facebook Data",
                    tabPanel("Small Multiples",
                             sidebarLayout(
                               sidebarPanel(uiOutput('mult_vars')),
-                              mainPanel(plotOutput("small_mult"))
+                              mainPanel(plotOutput("small_mult", height=600, width=800))
                             )
                    ),
                    tabPanel("Scatterplot Matrix",
                             pairsD3Output("scatter", width = 800, height = 800),
                             h5('Click and drag to select points to highlight'),
-                            h5('Hover over a point to see if it was paid or free')
+                            h5('Hover over a point to see if it was paid or free - this will appear in the upper lefthand corner')
                             ),
                    tabPanel("Parallel Coordinates",
                             sidebarLayout(
-                              sidebarPanel(uiOutput('par_vars')),
+                              sidebarPanel(uiOutput('par_vars'),
+                                           checkboxInput('par_col',
+                                                         'Color Code By Type?',
+                                                         value = F)),
                               mainPanel(plotOutput('parallel'))
                             )
                             

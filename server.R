@@ -1,4 +1,4 @@
-packageList = c('ggplot2', 'shiny', 'plyr', 'reshape', 'resahpe2', 'ggvis', 'pairsD3', 'MASS')
+packageList = c('ggplot2', 'shiny', 'plyr', 'reshape', 'ggvis', 'pairsD3', 'MASS')
 for (i in 1:length(packageList)) {
   if(! is.element(packageList[i],installed.packages()[,1])) {
     install.packages(packageList[i])
@@ -9,7 +9,6 @@ library(ggplot2)
 library(shiny)
 library(plyr)
 library(reshape)
-library(reshape2)
 library(ggvis)
 library(pairsD3)
 library(MASS)
@@ -41,6 +40,20 @@ catvars <- c('Type', 'Category', 'Post_Month', 'Post_Weekday', 'Post_Hour', 'Pai
 numvar_indx <- !names(clean_df) %in% catvars
 numvars <- names(clean_df)[numvar_indx]
 par_df <- clean_df[, numvar_indx]
+
+color_code <- function(x){
+  if(x == 'Photo') {
+    return('red')
+  } else if(x == 'Status') {
+    return('blue')
+  } else if(x == 'Link') {
+    return('green') 
+  } else {
+    return('purple')
+  }
+}
+
+par_df_cols <- sapply(clean_df$Type, color_code)
 
 # Initialize df of only small mu features
 df_num <- par_df
@@ -112,7 +125,7 @@ server <- function(input, output, session) {
   # Build the scatterplot using the pairsD3 package. TODO: Fix margins.
   output$scatter <- renderPairsD3({
     pairs_df %>% 
-    pairsD3(group = clean_df$Type, tooltip = clean_df$Paid, leftmar=30, topmar=0, width=800)
+    pairsD3(group = clean_df$Type, tooltip = clean_df$Paid, leftmar=0, topmar=0, width=800)
     
   })
   
@@ -127,8 +140,26 @@ server <- function(input, output, session) {
     validate(
       need(length(input$parvars) > 1, "Please select at least two variables to visualize")
     )
-    par_df[,names(par_df) %in% input$parvars] %>% 
-      parcoord(col=rainbow(nrow(par_df)), var.label=TRUE)
+    if(input$par_col){
+      parallel_colors <- par_df_cols
+      par(xpd = T, mar = par()$mar + c(0,0,0,7))
+      par_df[,names(par_df) %in% input$parvars] %>% 
+        parcoord(col=parallel_colors, var.label=TRUE)
+      legend(3, 0.5,
+             lty=1,
+             lwd=3,
+             col=c('red', 'blue', 'green', 'purple'),
+             bty="n", 
+             legend=c("Photo","Status","Link", "Video"),
+             ncol=3) 
+      par(mar=c(5, 4, 4, 2) + 0.1)
+    } else {
+      parallel_colors <- rainbow(nrow(par_df))
+      par(xpd = T, mar = par()$mar + c(0,0,0,7))
+      par_df[,names(par_df) %in% input$parvars] %>% 
+        parcoord(col=parallel_colors, var.label=TRUE)
+    }
+    
   })
   
   output$mult_vars <- renderUI({
@@ -143,7 +174,10 @@ server <- function(input, output, session) {
     mult_df <- subset(mdf2, variable %in% append(input$multvars, 'Post_Month'))
     ggplot(data=mult_df, aes(x=Post_Month, y=value, group=1)) + 
       geom_line() + 
-      facet_grid(variable ~ ., scales = 'free')
+      facet_grid(variable ~ ., scales = 'free') + 
+      labs(title='Small Multiples', x = 'Month of Post', y = 'Value') +
+      theme(plot.title = element_text(hjust=0.5, size=20),
+            axis.title = element_text(size=15))
   })
 }
 
